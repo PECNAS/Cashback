@@ -30,6 +30,8 @@ async def main() -> None:
 if __name__ == "__main__":
 	from imports import *
 
+	from handlers.commands_handler import *
+
 	logging.basicConfig(
 		level=logging.INFO,
 		stream=sys.stdout
