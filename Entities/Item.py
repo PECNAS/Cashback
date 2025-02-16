@@ -12,8 +12,11 @@ class Item(Base):
 	price: Mapped[int] = mapped_column(Integer())
 	cashback: Mapped[int] = mapped_column(Integer())
 
-	seller: Mapped["Seller"] = relationship(back_populates="seller", lazy="joined")
+	seller: Mapped["Seller"] = relationship(back_populates="items", lazy="joined")
 	seller_id: Mapped[int] = mapped_column(ForeignKey("seller.id"), nullable=False)
+
+	category: Mapped["Category"] = relationship(back_populates="items", lazy="joined")
+	category_id: Mapped[int] = mapped_column(ForeignKey("category.id"), nullable=False)
 
 	def __repr__(self):
 		return self.title
