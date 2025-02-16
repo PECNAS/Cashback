@@ -24,3 +24,7 @@ async def cancel_handler(message, state):
 	await message.answer(
 		MSGS["canceled"],
 		reply_markup=getUsersStartMarkup())
+
+@main_router.message(StateFilter(None), Command(commands=["add_moderator"]))
+async def add_moderator_handler(message, state):
+	pass

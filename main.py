@@ -32,6 +32,7 @@ if __name__ == "__main__":
 
 	from handlers.commands_handler import *
 	from handlers.client_handler import *
+	from handlers.seller_handler import *
 
 	logging.basicConfig(
 		level=logging.INFO,

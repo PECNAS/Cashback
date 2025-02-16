@@ -70,5 +70,20 @@ def get_category_by_title(title):
 	except NoResultFound:
 		return None
 
+def create_seller(tg_id, username, shop_title, shop_url):
+	if username == None: username = "not specified"
+	
+	with Session(engine) as session:
+		seller = Seller(
+			tg_id=tg_id,
+			username=username,
+			shop_title=shop_title,
+			shop_url=shop_url)
+
+		session.add(seller)
+		session.commit()
+
+		print(seller)
+
 if __name__ == "__main__":
 	print(get_category_by_title("Для домggа"))

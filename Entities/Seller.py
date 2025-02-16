@@ -12,6 +12,7 @@ class Seller(Base):
 	tg_id: Mapped[str] = mapped_column(String(30))
 	username: Mapped[str] = mapped_column(String(255))
 	shop_title: Mapped[str] = mapped_column(String(100))
+	shop_url: Mapped[str] = mapped_column(String())
 	items: Mapped[list["Item"]] = relationship(back_populates="seller")
 
 	def __repr__(self):
