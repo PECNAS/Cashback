@@ -85,5 +85,12 @@ def create_seller(tg_id, username, shop_title, shop_url):
 
 		print(seller)
 
+def get_categories():
+	with Session(engine) as session:
+		sel = select(Category)
+		categories = session.scalars(sel).all()
+
+		return categories
+
 if __name__ == "__main__":
 	print(get_category_by_title("Для домggа"))

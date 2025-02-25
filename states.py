@@ -6,3 +6,13 @@ class ClientGroup(StatesGroup):
 class SellerGroup(StatesGroup):
 	ShopTitleState = State()
 	ShopUrlState = State()
+
+class CreateItemGroup(StatesGroup):
+	ItemTitleState = State()
+	ItemDescState = State()
+	ItemImageState = State()
+	ItemPriceState = State()
+	ItemCashbackState = State()
+	ItemConditionState = State()
+	ItemCategoryState = State()
+	ItemConfirmState = State()

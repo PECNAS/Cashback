@@ -16,7 +16,7 @@ async def command_start_handler(message, state):
 		elif res["role"] == "seller":
 			await message.answer(
 			MSGS["start_message__seller"],
-			reply_markup=None)
+			reply_markup=getSellerMarkup())
 
 @main_router.message(F.text == BUTTONS["user"]["cancel"]) # отмена для пользователей
 async def cancel_handler(message, state):

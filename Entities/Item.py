@@ -10,7 +10,9 @@ class Item(Base):
 	title: Mapped[str] = mapped_column(String(255))
 	description: Mapped[str] = mapped_column(String())
 	price: Mapped[int] = mapped_column(Integer())
+	image: Mapped[str] = mapped_column(String())
 	cashback: Mapped[int] = mapped_column(Integer())
+	cashback_condition: Mapped[str] = mapped_column(String())
 
 	seller: Mapped["Seller"] = relationship(back_populates="items", lazy="joined")
 	seller_id: Mapped[int] = mapped_column(ForeignKey("seller.id"), nullable=False)
