@@ -70,6 +70,19 @@ def get_category_by_title(title):
 	except NoResultFound:
 		return None
 
+def get_category_by_id(cat_id):
+	try:
+		with Session(engine) as session:
+			sel = select(Category).where(
+					Category.id.in_([cat_id])
+				)
+			category = session.scalars(sel).one()
+
+			return category
+
+	except NoResultFound:
+		return None
+
 def create_seller(tg_id, username, shop_title, shop_url):
 	if username == None: username = "not specified"
 	
@@ -92,5 +105,63 @@ def get_categories():
 
 		return categories
 
+def get_seller_id(tg_id):
+	with Session(engine) as session:
+		sel = select(Seller).where(
+				Seller.tg_id.in_([tg_id])
+			)
+		seller = session.scalars(sel).one()
+
+		return seller.id
+
+def create_item(title, desc, price, image, cashback, cond, seller_id, cat_id):
+	with Session(engine) as session:
+		item = Item(
+			title=title,
+			description=desc,
+			price=price,
+			image=image,
+			cashback=cashback,
+			cashback_condition=cond,
+			seller_id=seller_id,
+			category_id=cat_id)
+		session.add(item)
+		session.commit()
+
+def get_seller_items(tg_id):
+	with Session(engine) as session:
+		sel = select(Seller).where(
+				Seller.tg_id.in_([tg_id])
+			)
+		seller = session.scalars(sel).one()
+
+		sel = select(Item).where(
+				Item.seller_id.in_([seller.id])
+			)
+		items = session.scalars(sel).all()
+
+		return items
+
+def get_item_by_id(item_id):
+	try:
+		with Session(engine) as session:
+			sel = select(Item).where(
+					Item.id.in_([item_id])
+				)
+			item = session.scalars(sel).one()
+
+			return item
+
+	except NoResultFound:
+		return None
+
+def delete_item(item_id):
+	item = get_item_by_id(item_id)
+	with Session(engine) as session:
+		session.delete(item)
+		session.commit()
+
+
+
 if __name__ == "__main__":
-	print(get_category_by_title("Для домggа"))
+	print(get_seller_items(752594294))

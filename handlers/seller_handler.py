@@ -27,10 +27,10 @@ async def ShopUrlState_handler(message, state):
 
 	await state.clear()
 
-@main_router.message(F.text == BUTTONS["seller"]["menu"][0])
+@main_router.message(StateFilter(None), F.text == BUTTONS["seller"]["menu"][0])
 async def add_item_handler(message, state):
 	await message.answer(MSGS["seller_add_item__0"])
-	
+
 	await state.set_state(CreateItemGroup.ItemTitleState)
 
 @main_router.message(StateFilter(CreateItemGroup.ItemTitleState))
@@ -71,7 +71,7 @@ async def ItemPriceState_handler(message, state):
 async def ItemCashbackState_handler(message, state):
 	if message.text.endswith("%") and message.text.strip("%").isdigit():
 		await message.answer(MSGS["seller_add_item__5"])
-		await state.update_data(cashback=message.text)
+		await state.update_data(cashback=message.text.strip("%"))
 
 		await state.set_state(CreateItemGroup.ItemConditionState)
 	else:
@@ -82,25 +82,61 @@ async def ItemConditionState_handler(message, state):
 	await message.answer(
 		MSGS["seller_add_item__6"],
 		reply_markup=getCategoriesMarkup())
-	await state.update_data(condition=message.text)
+	await state.update_data(cond=message.text)
 
 	await state.set_state(CreateItemGroup.ItemCategoryState)
 
 @main_router.callback_query(StateFilter(CreateItemGroup.ItemCategoryState))
 async def ItemCategoryState_handler(call, state):
 	await call.answer()
+	await state.update_data(
+		category=call.data.replace("category_", "")
+	)
+
+	data = (await state.get_data())
+
+	title = data.get("title")
+	description = data.get("desc")
+	price = data.get("price")
+	image = data.get("image")
+	cashback = data.get("cashback")
+	print(data.get("category"))
+	category = get_category_by_id(data.get("category")).title
+
+	text = MSGS["item_card"].format(
+			title,
+			description,
+			price,
+			cashback,
+			category
+		)
+
+	await bot.send_photo(chat_id=call.from_user.id,
+						caption=text,
+						photo=image)
+	
 	await call.message.answer(
 		MSGS["seller_add_item__7"],
 		reply_markup=getConfirmMarkup())
-	await state.update_data(
-			category=call.data.replace("category_", "")
-		)
 
 	await state.set_state(CreateItemGroup.ItemConfirmState)
 
 @main_router.callback_query(StateFilter(CreateItemGroup.ItemConfirmState), F.data == "accept")
 async def ItemConfirmState_success_handler(call, state):
 	await call.answer()
+
+	data = (await state.get_data())
+	seller_id = get_seller_id(call.from_user.id)
+	create_item(
+		title=data.get("title"),
+		desc=data.get("desc"),
+		price=data.get("price"),
+		image=data.get("image"),
+		cashback=data.get("cashback"),
+		cond=data.get("cond"),
+		seller_id=seller_id,
+		cat_id=data.get("category"))
+
 	await call.message.answer(
 			MSGS["seller_add_item__success"],
 			reply_markup=getSellerMarkup()
@@ -117,3 +153,52 @@ async def ItemConfirmState_deny_handler(call, state):
 			)
 	
 	await state.clear()
+
+@main_router.message(StateFilter(None), F.text == BUTTONS["seller"]["menu"][1])
+async def get_seller_items_handler(message, state, user_id=None):
+	if user_id == None:
+		user_id = message.from_user.id
+	items = get_seller_items(user_id)
+
+	if len(items) == 0:
+		await message.answer(
+			MSGS["seller_no_items"],
+			reply_markup=getSellerMarkup())
+	else:
+		await message.answer(
+			MSGS["seller_items"].format(len(items)),
+			reply_markup=getSellerItemsMarkup(items)
+			)
+
+@main_router.callback_query(StateFilter(None), F.data.startswith("item_"))
+async def seller_items_handler(call, state):
+	await call.message.delete()
+
+	item = get_item_by_id(call.data.strip("item_"))
+	text = MSGS["item_card"].format(
+			item.title,
+			item.description,
+			item.price,
+			item.cashback,
+			item.category.title
+		)
+
+	await bot.send_photo(chat_id=call.from_user.id,
+						caption=text,
+						photo=item.image,
+						reply_markup=getDeleteItemMarkup(item))
+
+@main_router.callback_query(StateFilter(None), F.data.startswith("remove_item__"))
+async def remove_item_handler(call, state):
+	data = call.data.strip("remove_item__")
+	item_id, title = data.split("|")
+
+	delete_item(item_id)
+
+	await call.message.answer(
+		MSGS["seller_remove_item_success"].format(
+			title))
+	await call.message.delete()
+
+	await asyncio.sleep(2)
+	await get_seller_items_handler(call.message, state, user_id=call.from_user.id)

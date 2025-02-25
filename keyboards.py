@@ -52,5 +52,25 @@ def getSellerMarkup():
 
 	return markup
 
+def getSellerItemsMarkup(items):
+	builder = InlineKeyboardBuilder()
+
+	for item in items:
+		builder.button(
+			text=item.title,
+			callback_data=f"item_{item.id}")
+
+	builder.adjust(2)
+	markup = builder.as_markup()
+
+	return markup
+
+def getDeleteItemMarkup(item):
+	builder = InlineKeyboardBuilder()
+	builder.button(
+		text="Удалить 🗑",
+		callback_data=f"remove_item__{item.id}|{item.title}")
+	return builder.as_markup()
+
 if __name__ == "__main__":
 	getCategoriesMarkup()
