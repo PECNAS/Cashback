@@ -49,28 +49,36 @@ async def ItemDescState_handler(message, state):
 
 @main_router.message(StateFilter(CreateItemGroup.ItemImageState))
 async def ItemImageState_handler(message, state):
-	await message.answer(MSGS["seller_add_item__3"])
-	await state.update_data(image=message.photo[0].file_id)
+	try:
+		await state.update_data(image=message.photo[0].file_id)
+		await message.answer(MSGS["seller_add_item__3"])
 
-	await state.set_state(CreateItemGroup.ItemPriceState)
+		await state.set_state(CreateItemGroup.ItemPriceState)
+	except:
+		await message.answer(MSGS["seller_add_item__image_error"])
 
 @main_router.message(StateFilter(CreateItemGroup.ItemPriceState))
 async def ItemPriceState_handler(message, state):
-	await message.answer(MSGS["seller_add_item__4"])
-	await state.update_data(price=message.text)
+	if message.text.isdigit():
+		await message.answer(MSGS["seller_add_item__4"])
+		await state.update_data(price=message.text)
 
-	await state.set_state(CreateItemGroup.ItemCashbackState)
+		await state.set_state(CreateItemGroup.ItemCashbackState)
+	else:
+		await message.answer(MSGS["seller_add_item__price_error"])
 
 @main_router.message(StateFilter(CreateItemGroup.ItemCashbackState))
 async def ItemCashbackState_handler(message, state):
-	await message.answer(MSGS["seller_add_item__5"])
-	await state.update_data(cashback=message.text)
+	if message.text.endswith("%") and message.text.strip("%").isdigit():
+		await message.answer(MSGS["seller_add_item__5"])
+		await state.update_data(cashback=message.text)
 
-	await state.set_state(CreateItemGroup.ItemConditionState)
+		await state.set_state(CreateItemGroup.ItemConditionState)
+	else:
+		await message.answer(MSGS["seller_add_item__cashback_error"])
 
 @main_router.message(StateFilter(CreateItemGroup.ItemConditionState))
 async def ItemConditionState_handler(message, state):
-	await call.answer()
 	await message.answer(
 		MSGS["seller_add_item__6"],
 		reply_markup=getCategoriesMarkup())
@@ -80,6 +88,7 @@ async def ItemConditionState_handler(message, state):
 
 @main_router.callback_query(StateFilter(CreateItemGroup.ItemCategoryState))
 async def ItemCategoryState_handler(call, state):
+	await call.answer()
 	await call.message.answer(
 		MSGS["seller_add_item__7"],
 		reply_markup=getConfirmMarkup())
@@ -90,7 +99,7 @@ async def ItemCategoryState_handler(call, state):
 	await state.set_state(CreateItemGroup.ItemConfirmState)
 
 @main_router.callback_query(StateFilter(CreateItemGroup.ItemConfirmState), F.data == "accept")
-async def ItemConfirmState_handler(call, state):
+async def ItemConfirmState_success_handler(call, state):
 	await call.answer()
 	await call.message.answer(
 			MSGS["seller_add_item__success"],
@@ -100,7 +109,7 @@ async def ItemConfirmState_handler(call, state):
 	await state.clear()
 
 @main_router.callback_query(StateFilter(CreateItemGroup.ItemConfirmState), F.data == "deny")
-async def ItemConfirmState_handler(call, state):
+async def ItemConfirmState_deny_handler(call, state):
 	await call.answer()
 	await call.message.answer(
 			MSGS["seller_add_item__error"],
