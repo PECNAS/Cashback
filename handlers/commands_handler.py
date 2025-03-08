@@ -12,7 +12,7 @@ async def command_start_handler(message, state):
 		if res["role"] == "client":
 			await message.answer(
 			MSGS["start_message__client"],
-			reply_markup=None)
+			reply_markup=getClientMarkup())
 		elif res["role"] == "seller":
 			await message.answer(
 			MSGS["start_message__seller"],

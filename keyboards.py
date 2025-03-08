@@ -112,5 +112,17 @@ def getClientMarkup():
 
 	return markup
 
+def getClientMenuMarkup():
+	builder = InlineKeyboardBuilder()
+	for data, btn in BUTTONS["client"]["items_list"].items():
+		builder.button(
+			text=btn,
+			callback_data=data)
+
+	builder.adjust(3)
+	markup = builder.as_markup()
+
+	return markup
+
 if __name__ == "__main__":
 	getCategoriesMarkup()

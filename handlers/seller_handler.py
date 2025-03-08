@@ -100,7 +100,6 @@ async def ItemCategoryState_handler(call, state):
 	price = data.get("price")
 	image = data.get("image")
 	cashback = data.get("cashback")
-	print(data.get("category"))
 	category = get_category_by_id(data.get("category")).title
 
 	text = MSGS["item_card"].format(
@@ -126,16 +125,43 @@ async def ItemConfirmState_success_handler(call, state):
 	await call.answer()
 
 	data = (await state.get_data())
+
+	title = data.get("title")
+	description = data.get("desc")
+	price = data.get("price")
+	image = data.get("image")
+	cashback = data.get("cashback")
+	print(data.get("category"))
+	category = get_category_by_id(data.get("category")).id
+
 	seller_id = get_seller_id(call.from_user.id)
+
 	create_item(
-		title=data.get("title"),
+		title=title,
 		desc=data.get("desc"),
-		price=data.get("price"),
-		image=data.get("image"),
-		cashback=data.get("cashback"),
+		price=price,
+		image=image,
+		cashback=cashback,
 		cond=data.get("cond"),
 		seller_id=seller_id,
-		cat_id=data.get("category"))
+		cat_id=category)
+
+	users = get_users_with_cat(data.get("category"))
+	for user in users:
+		try:
+			text = MSGS["item_card"].format(
+			title,
+			description,
+			price,
+			cashback,
+			category)
+
+			await bot.send_photo(
+				chat_id=call.from_user.id,
+				caption=text,
+				photo=image)
+		except:
+			print("Blocked")
 
 	await call.message.answer(
 			MSGS["seller_add_item__success"],

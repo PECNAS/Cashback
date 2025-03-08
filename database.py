@@ -50,7 +50,7 @@ def create_client(tg_id, username, category):
 		client = Client(
 			tg_id=tg_id,
 			username=username,
-			category=category.id)
+			category_id=category.id)
 
 		session.add(client)
 		session.commit()
@@ -172,6 +172,24 @@ def delete_category(cat_id):
 	with Session(engine) as session:
 		session.delete(cat)
 		session.commit()
+
+def get_items_in_category(cat_id):
+	with Session(engine) as session:
+		sel = select(Item).where(
+				Item.category_id.in_([cat_id])
+			)
+		items = session.scalars(sel).all()
+
+		return items
+
+def get_users_with_cat(cat_id):
+	with Session(engine) as session:
+		sel = select(Client).where(
+				Client.category_id.in_([cat_id])
+			)
+		users = session.scalars(sel).all()
+
+		return users
 
 if __name__ == "__main__":
 	print(get_seller_items(752594294))
