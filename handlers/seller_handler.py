@@ -202,3 +202,10 @@ async def remove_item_handler(call, state):
 
 	await asyncio.sleep(2)
 	await get_seller_items_handler(call.message, state, user_id=call.from_user.id)
+
+@main_router.callback_query(StateFilter(None), F.data == "back")
+async def remove_item_handler(call, state):
+	await call.answer()
+	await get_seller_items_handler(call.message, state, user_id=call.from_user.id)
+
+	await call.message.delete()

@@ -66,7 +66,10 @@ BUTTONS = {
 	},
 
 	"client": {
-
+		"menu": {
+			"show_items": "Товары🛒",
+			
+		}
 	},
 
 	"admin": {

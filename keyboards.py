@@ -70,6 +70,14 @@ def getDeleteItemMarkup(item):
 	builder.button(
 		text="Удалить 🗑",
 		callback_data=f"remove_item__{item.id}|{item.title}")
+	builder.button(
+		text="Редактировать ✏",
+		callback_data=f"edit_item__{item.id}|{item.title}")
+	builder.button(
+		text="Назад ⏪",
+		callback_data=f"back")
+
+	builder.adjust(2)
 	return builder.as_markup()
 
 def getAdminMarkup():
@@ -88,6 +96,17 @@ def getAdminCancelMarkup():
 	builder = ReplyKeyboardBuilder()
 	builder.button(text=BUTTONS["admin"]["cancel"])
 
+	markup = builder.as_markup()
+	markup.resize_keyboard = True
+
+	return markup
+
+def getClientMarkup():
+	builder = ReplyKeyboardBuilder()
+	for btn in BUTTONS["client"]["menu"].values():
+		builder.button(text=btn)
+
+	builder.adjust(2)
 	markup = builder.as_markup()
 	markup.resize_keyboard = True
 

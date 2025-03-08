@@ -5,16 +5,19 @@ async def client_handler(message, state):
 	await state.set_state(ClientGroup.CategoryState)
 	await message.answer(
 			MSGS["choose_category"],
-			reply_markup=None
+			reply_markup=getCategoriesMarkup()
 		)
 
-@main_router.message(StateFilter(ClientGroup.CategoryState))
-async def CategoryState_handler(message, state):
-	category = get_category_by_title(message.text)
+@main_router.callback_query(StateFilter(ClientGroup.CategoryState))
+async def CategoryState_handler(call, state):
+	category = get_category_by_id(call.data.strip("category_"))
 	create_client(
-		message.from_user.id,
-		message.from_user.username,
+		call.from_user.id,
+		call.from_user.username,
 		category)
 
-	await message.answer(MSGS["client_created_success"])
+	await call.answer()
+	await call.message.answer(
+		MSGS["client_created_success"],
+		reply_markup=getClientMarkup())
 	await state.clear()
