@@ -161,7 +161,17 @@ def delete_item(item_id):
 		session.delete(item)
 		session.commit()
 
+def create_category(title):
+	with Session(engine) as session:
+		cat = Category(title=title)
+		session.add(cat)
+		session.commit()
 
+def delete_category(cat_id):
+	cat = get_category_by_id(cat_id)
+	with Session(engine) as session:
+		session.delete(cat)
+		session.commit()
 
 if __name__ == "__main__":
 	print(get_seller_items(752594294))

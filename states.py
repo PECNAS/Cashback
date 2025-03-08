@@ -16,3 +16,8 @@ class CreateItemGroup(StatesGroup):
 	ItemConditionState = State()
 	ItemCategoryState = State()
 	ItemConfirmState = State()
+
+class AdminGroup(StatesGroup):
+	AdminMenuState = State()
+	AddCatState = State()
+	RemoveCatState = State()

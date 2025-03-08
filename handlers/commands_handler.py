@@ -18,13 +18,23 @@ async def command_start_handler(message, state):
 			MSGS["start_message__seller"],
 			reply_markup=getSellerMarkup())
 
+@main_router.message(StateFilter(None), Command(commands=["admin"]))
+async def command_admin_handler(message, state):
+	await message.answer(
+		MSGS["admin_menu_start"],
+		reply_markup=getAdminMarkup())
+	await state.set_state(AdminGroup.AdminMenuState)
+
 @main_router.message(F.text == BUTTONS["user"]["cancel"]) # отмена для пользователей
 async def cancel_handler(message, state):
 	await state.clear()
 	await message.answer(
-		MSGS["canceled"],
+		MSGS["cancelled"],
 		reply_markup=getUsersStartMarkup())
 
-@main_router.message(StateFilter(None), Command(commands=["add_moderator"]))
-async def add_moderator_handler(message, state):
-	pass
+@main_router.message(F.text == BUTTONS["admin"]["cancel"])
+async def admin_cancel_handler(message, state):
+	await state.set_state(AdminGroup.AdminMenuState)
+	await message.answer(
+		MSGS["cancelled"],
+		reply_markup=getAdminMarkup())

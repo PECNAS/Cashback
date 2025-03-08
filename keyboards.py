@@ -72,5 +72,26 @@ def getDeleteItemMarkup(item):
 		callback_data=f"remove_item__{item.id}|{item.title}")
 	return builder.as_markup()
 
+def getAdminMarkup():
+	builder = ReplyKeyboardBuilder()
+
+	for btn in BUTTONS["admin"]["menu"].values():
+		builder.button(text=btn)
+
+	builder.adjust(2)
+	markup = builder.as_markup()
+	markup.resize_keyboard = True
+
+	return markup
+
+def getAdminCancelMarkup():
+	builder = ReplyKeyboardBuilder()
+	builder.button(text=BUTTONS["admin"]["cancel"])
+
+	markup = builder.as_markup()
+	markup.resize_keyboard = True
+
+	return markup
+
 if __name__ == "__main__":
 	getCategoriesMarkup()
