@@ -60,12 +60,18 @@ async def ItemImageState_handler(message, state):
 @main_router.message(StateFilter(CreateItemGroup.ItemPriceState))
 async def ItemPriceState_handler(message, state):
 	if message.text.isdigit():
-		await message.answer(MSGS["seller_add_item__4"])
+		await message.answer(MSGS["seller_add_item__link"])
 		await state.update_data(price=message.text)
 
-		await state.set_state(CreateItemGroup.ItemCashbackState)
+		await state.set_state(CreateItemGroup.ItemLinkState)
 	else:
 		await message.answer(MSGS["seller_add_item__price_error"])
+
+@main_router.message(StateFilter(CreateItemGroup.ItemLinkState))
+async def ItemLinkState_handler(message, state):
+	await message.answer(MSGS["seller_add_item__4"])
+	await state.update_data(link=message.text)
+	await state.set_state(CreateItemGroup.ItemCashbackState)
 
 @main_router.message(StateFilter(CreateItemGroup.ItemCashbackState))
 async def ItemCashbackState_handler(message, state):
@@ -107,7 +113,8 @@ async def ItemCategoryState_handler(call, state):
 			description,
 			price,
 			cashback,
-			category
+			category,
+			data.get("cond")
 		)
 
 	await bot.send_photo(chat_id=call.from_user.id,
@@ -131,8 +138,8 @@ async def ItemConfirmState_success_handler(call, state):
 	price = data.get("price")
 	image = data.get("image")
 	cashback = data.get("cashback")
-	print(data.get("category"))
 	category = get_category_by_id(data.get("category")).id
+	link = data.get("link")
 
 	seller_id = get_seller_id(call.from_user.id)
 
@@ -144,20 +151,26 @@ async def ItemConfirmState_success_handler(call, state):
 		cashback=cashback,
 		cond=data.get("cond"),
 		seller_id=seller_id,
-		cat_id=category)
+		cat_id=category,
+		link=link)
 
 	users = get_users_with_cat(data.get("category"))
 	for user in users:
+		print(user)
 		try:
 			text = MSGS["item_card"].format(
 			title,
 			description,
 			price,
 			cashback,
-			category)
+			category,
+			data.get("cond"))
 
+			await bot.send_message(
+				chat_id=user.tg_id,
+				text=MSGS["new_item"])
 			await bot.send_photo(
-				chat_id=call.from_user.id,
+				chat_id=user.tg_id,
 				caption=text,
 				photo=image)
 		except:
@@ -206,7 +219,8 @@ async def seller_items_handler(call, state):
 			item.description,
 			item.price,
 			item.cashback,
-			item.category.title
+			item.category.title,
+			item.cond
 		)
 
 	await bot.send_photo(chat_id=call.from_user.id,

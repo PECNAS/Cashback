@@ -11,6 +11,7 @@ class Item(Base):
 	description: Mapped[str] = mapped_column(String())
 	price: Mapped[int] = mapped_column(Integer())
 	image: Mapped[str] = mapped_column(String())
+	link: Mapped[str] = mapped_column(String())
 	cashback: Mapped[int] = mapped_column(Integer())
 	cashback_condition: Mapped[str] = mapped_column(String())
 

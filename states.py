@@ -12,6 +12,7 @@ class CreateItemGroup(StatesGroup):
 	ItemDescState = State()
 	ItemImageState = State()
 	ItemPriceState = State()
+	ItemLinkState = State()
 	ItemCashbackState = State()
 	ItemConditionState = State()
 	ItemCategoryState = State()

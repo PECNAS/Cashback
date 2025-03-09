@@ -52,13 +52,14 @@ async def CategoryState_handler(call, state):
 			item.description,
 			item.price,
 			item.cashback,
-			item.category.title)
+			item.category.title,
+			item.cashback_condition)
 
 	await bot.send_photo(
 		chat_id=call.from_user.id,
 		caption=text,
 		photo=item.image,
-		reply_markup=getClientMenuMarkup())
+		reply_markup=getClientMenuMarkup(link=item.link))
 
 	await call.message.delete()
 
@@ -82,13 +83,14 @@ async def ItemsListState_back_handler(call, state):
 			item.description,
 			item.price,
 			item.cashback,
-			item.category.title)
+			item.category.title,
+			item.cashback_condition)
 
 	await bot.send_photo(
 		chat_id=call.from_user.id,
 		caption=text,
 		photo=item.image,
-		reply_markup=getClientMenuMarkup())
+		reply_markup=getClientMenuMarkup(link=item.link))
 
 	await call.message.delete()
 
@@ -112,21 +114,16 @@ async def ItemsListState_next_handler(call, state):
 			item.description,
 			item.price,
 			item.cashback,
-			item.category.title)
+			item.category.title,
+			item.cashback_condition)
 
 	await bot.send_photo(
 		chat_id=call.from_user.id,
 		caption=text,
 		photo=item.image,
-		reply_markup=getClientMenuMarkup())
+		reply_markup=getClientMenuMarkup(link=item.link))
 
 	await call.message.delete()
-
-@main_router.callback_query(StateFilter(ShowItemsGroup.ItemsListState), F.data == "write")
-async def ItemsListState_write_handler(call, state):
-	data = (await state.get_data())
-	items = data.get("items")
-	current_item = data.get("current_item")
 
 
 @main_router.callback_query(StateFilter(ShowItemsGroup.ItemsListState), F.data == "close")
@@ -137,3 +134,7 @@ async def ItemsListState_close_handler(call, state):
 		reply_markup=getClientMarkup())
 
 	await call.message.delete()
+
+@main_router.callback_query(StateFilter(ShowItemsGroup.ItemsListState), F.data == "check")
+async def ItemsListState_check_handler(call, state):
+	pass

@@ -18,7 +18,23 @@ bot = Bot(
 		)
 
 def startup():
-	print("Hello, friend!")
+	cats = get_categories()
+	if cats == []:
+		create_category("Техника")
+		create_category("Дом")
+		create_category("Хобби")
+		create_category("Инструменты")
+		create_category("Освещение")
+		create_category("Одежда")
+		create_category("Аксессуары")
+		create_category("Цветы")
+
+	clients, sellers, cats, items = get_startup_info()
+	print(f"\n\nBot is started!\n\
+Number of clients: {clients}\n\
+Number of sellers: {sellers}\n\
+Number of categories: {cats}\n\
+Number of items: {items}\n\n")
 
 def shutdown():
 	print("Goodbye, friend!")

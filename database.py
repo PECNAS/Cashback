@@ -114,7 +114,7 @@ def get_seller_id(tg_id):
 
 		return seller.id
 
-def create_item(title, desc, price, image, cashback, cond, seller_id, cat_id):
+def create_item(title, desc, price, image, cashback, cond, seller_id, cat_id, link):
 	with Session(engine) as session:
 		item = Item(
 			title=title,
@@ -124,7 +124,8 @@ def create_item(title, desc, price, image, cashback, cond, seller_id, cat_id):
 			cashback=cashback,
 			cashback_condition=cond,
 			seller_id=seller_id,
-			category_id=cat_id)
+			category_id=cat_id,
+			link=link)
 		session.add(item)
 		session.commit()
 
@@ -191,5 +192,24 @@ def get_users_with_cat(cat_id):
 
 		return users
 
+def get_startup_info():
+	with Session(engine) as session:
+		sel1 = select(Client)
+		sel2 = select(Seller)
+		sel3 = select(Item)
+		sel4 = select(Category)
+
+		clients = session.scalars(sel1).all()
+		sellers = session.scalars(sel2).all()
+		items = session.scalars(sel3).all()
+		cats = session.scalars(sel4).all()
+
+		return [
+		len(clients),
+		len(sellers),
+		len(cats),
+		len(items)
+		]
+
 if __name__ == "__main__":
-	print(get_seller_items(752594294))
+	get_startup_info()

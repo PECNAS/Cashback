@@ -112,12 +112,17 @@ def getClientMarkup():
 
 	return markup
 
-def getClientMenuMarkup():
+def getClientMenuMarkup(link):
 	builder = InlineKeyboardBuilder()
 	for data, btn in BUTTONS["client"]["items_list"].items():
-		builder.button(
-			text=btn,
-			callback_data=data)
+		if data == "buy":
+			builder.button(
+				text=btn,
+				url=link)
+		else:
+			builder.button(
+				text=btn,
+				callback_data=data)
 
 	builder.adjust(3)
 	markup = builder.as_markup()
