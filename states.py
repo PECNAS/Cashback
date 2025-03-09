@@ -22,6 +22,8 @@ class AdminGroup(StatesGroup):
 	AdminMenuState = State()
 	AddCatState = State()
 	RemoveCatState = State()
+	AddModerState = State()
+	RemoveModerState = State()
 
 class ShowItemsGroup(StatesGroup):
 	CategoryState = State()

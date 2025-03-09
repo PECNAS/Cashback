@@ -9,7 +9,11 @@ async def command_start_handler(message, state):
 			MSGS["start_message__no_reg"],
 			reply_markup=getUsersStartMarkup())
 	else:
-		if res["role"] == "client":
+		if res["role"] == "moderator":
+			await message.answer(
+				MSGS["start_message__moder"],
+				reply_markup=getModerMarkup())
+		elif res["role"] == "client":
 			await message.answer(
 			MSGS["start_message__client"],
 			reply_markup=getClientMarkup())
@@ -20,10 +24,11 @@ async def command_start_handler(message, state):
 
 @main_router.message(StateFilter(None), Command(commands=["admin"]))
 async def command_admin_handler(message, state):
-	await message.answer(
-		MSGS["admin_menu_start"],
-		reply_markup=getAdminMarkup())
-	await state.set_state(AdminGroup.AdminMenuState)
+	if str(message.from_user.id) in ADMINS:
+		await message.answer(
+			MSGS["admin_menu_start"],
+			reply_markup=getAdminMarkup())
+		await state.set_state(AdminGroup.AdminMenuState)
 
 @main_router.message(F.text == BUTTONS["user"]["cancel"]) # отмена для пользователей
 async def cancel_handler(message, state):

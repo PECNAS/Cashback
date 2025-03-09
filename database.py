@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -7,6 +9,8 @@ from Entities.Client import Client
 from Entities.Seller import Seller
 from Entities.Item import Item
 from Entities.Category import Category
+from Entities.Moderator import Moderator
+from Entities.Request import Request
 
 from Entities.Base import Base
 
@@ -16,14 +20,14 @@ Base.metadata.create_all(engine)
 def check_user(tg_id):
 	with Session(engine) as session:
 		try:
-			sel = select(Client).where(
-					Client.tg_id.in_([tg_id])
+			sel = select(Moderator).where(
+					Moderator.tg_id.in_([tg_id])
 				)
-			client = session.scalars(sel).one()
+			moder = session.scalars(sel).one()
 
 			return {
-				"role": "client",
-				"object": client
+				"role": "moderator",
+				"object": moder
 			}
 
 		except NoResultFound:
@@ -38,7 +42,19 @@ def check_user(tg_id):
 					"object": seller
 				}
 			except NoResultFound:
-				return None
+				try:
+					sel = select(Client).where(
+						Client.tg_id.in_([tg_id])
+					)
+					client = session.scalars(sel).one()
+
+					return {
+						"role": "client",
+						"object": client
+					}
+						
+				except NoResultFound:
+					return None
 
 def create_client(tg_id, username, category):
 	'''
@@ -205,11 +221,46 @@ def get_startup_info():
 		cats = session.scalars(sel4).all()
 
 		return [
-		len(clients),
-		len(sellers),
-		len(cats),
-		len(items)
+			len(clients),
+			len(sellers),
+			len(cats),
+			len(items)
 		]
+
+def create_moderator(moder):
+	with Session(engine) as session:
+		obj = Moderator(
+			tg_id=moder.tg_id,
+			username=moder.username)
+		session.add(obj)
+		session.commit()
+
+def create_request(client_id, item_id):
+	with Session(engine) as session:
+		req = Request(
+			client_id=client_id,
+			item_id=item_id,
+			date=datetime.now().strftime("%d.%M.%Y"),
+			status="checking")
+		session.add(req)
+		session.commit()
+
+def get_requests():
+	with Session(engine) as session:
+		sel = select(Request).where(
+				Request.status.in_(["checking"])
+			)
+		return session.scalars(sel).all()
+
+def close_request(req_id):
+	with Session(engine) as session:
+		sel = select(Request).where(
+				Request.id.in_([req_id])
+			)
+		req = session.scalars(sel).one()
+		req.status = "close"
+
+		session.commit()
 
 if __name__ == "__main__":
 	get_startup_info()

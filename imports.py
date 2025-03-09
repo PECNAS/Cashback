@@ -8,7 +8,7 @@ from aiogram import F, Router
 from time import strptime
 
 from main import dp, bot
-from config import MSGS, BUTTONS
+from config import MSGS, BUTTONS, ADMINS
 from keyboards import *
 from states import *
 from database import *

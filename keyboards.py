@@ -129,5 +129,25 @@ def getClientMenuMarkup(link):
 
 	return markup
 
+def getModerMarkup():
+	builder = ReplyKeyboardBuilder()
+	for btn in BUTTONS["moder"]["menu"].values():
+		builder.button(text=btn)
+
+	builder.adjust(2)
+	markup = builder.as_markup()
+	markup.resize_keyboard = True
+
+	return markup
+
+def getCloseRequestMarkup(req_id):
+	builder = InlineKeyboardBuilder()
+	for data, btn in BUTTONS["moder"]["close_req"].items():
+		builder.button(
+			text=btn,
+			callback_data=f"{data}__{req_id}")
+
+	return builder.as_markup()
+
 if __name__ == "__main__":
 	getCategoriesMarkup()

@@ -137,4 +137,14 @@ async def ItemsListState_close_handler(call, state):
 
 @main_router.callback_query(StateFilter(ShowItemsGroup.ItemsListState), F.data == "check")
 async def ItemsListState_check_handler(call, state):
-	pass
+	client_id = call.from_user.id
+
+	data = (await state.get_data())
+	items = data.get("items")
+	item_id = items[data.get("current_item")].id
+
+	create_request(client_id, item_id)
+
+	await call.answer()
+	await call.message.answer(
+		MSGS["client_request_created"])

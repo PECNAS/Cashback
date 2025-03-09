@@ -50,6 +50,7 @@ if __name__ == "__main__":
 	from handlers.client_handler import *
 	from handlers.seller_handler import *
 	from handlers.admin_handler import *
+	from handlers.moderator_handler import *
 
 	logging.basicConfig(
 		level=logging.INFO,

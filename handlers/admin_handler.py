@@ -21,6 +21,9 @@ async def remove_cat_handler(message, state):
 	await message.answer(
 		MSGS["admin_remove_cat"],
 		reply_markup=getCategoriesMarkup())
+	await message.answer(
+		"Для отмены нажмите кнопку ниже",
+		reply_markup=getAdminCancelMarkup())
 	await state.set_state(AdminGroup.RemoveCatState)
 
 @main_router.callback_query(StateFilter(AdminGroup.RemoveCatState))
@@ -36,3 +39,36 @@ async def RemoveCatState_handler(call, state):
 	
 	await call.message.delete()
 	await state.set_state(AdminGroup.AdminMenuState)
+
+@main_router.message(StateFilter(AdminGroup.AdminMenuState), F.text == BUTTONS["admin"]["menu"]["add_moder"])
+async def add_moder_handler(message, state):
+	await message.answer(
+		MSGS["admin_add_moder_username"],
+		reply_markup=getAdminCancelMarkup())
+	await state.set_state(AdminGroup.AddModerState)
+
+@main_router.message(StateFilter(AdminGroup.AddModerState))
+async def AddModerState_handler(message, state):
+	moder = check_user(message.text)
+	if moder != None and moder.get("role") == "client":
+		create_moderator(moder.get("object"))
+		await message.answer(
+			MSGS["admin_add_moder_success"],
+			reply_markup=getAdminMarkup())
+		await state.clear()
+		await state.set_state(AdminGroup.AdminMenuState)
+	else:
+		await message.answer(MSGS["admin_add_moder_error"])
+
+
+@main_router.message(StateFilter(AdminGroup.AdminMenuState), F.text == BUTTONS["admin"]["menu"]["remove_moder"])
+async def remove_moder_handler(message, state):
+	await message.answer(
+		MSGS["admin_remove_moder_username"],
+		reply_markup=getAdminCancelMarkup())
+	await state.set_state(AdminGroup.RemoveModerState)
+
+
+@main_router.message(StateFilter(AdminGroup.RemoveModerState))
+async def RemoveModerState_handler(message, state):
+	pass
