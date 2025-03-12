@@ -11,16 +11,28 @@ async def client_handler(message, state):
 @main_router.callback_query(StateFilter(ClientGroup.CategoryState))
 async def CategoryState_handler(call, state):
 	category = get_category_by_id(call.data.strip("category_"))
-	create_client(
-		call.from_user.id,
-		call.from_user.username,
-		category)
-
-	await call.answer()
+	await state.update_data(cat=category)
 	await call.message.answer(
-		MSGS["client_created_success"],
-		reply_markup=getClientMarkup())
-	await state.clear()
+		MSGS["min_cashback"])
+	await call.message.delete()
+
+	await state.set_state(ClientGroup.MinCashbackState)
+
+@main_router.message(StateFilter(ClientGroup.MinCashbackState))
+async def MinCashbackState_handler(message, state):
+	if message.text.endswith("%") and message.text.strip("%").isdigit():
+		category = (await state.get_data()).get("cat")
+		create_client(
+			message.from_user.id,
+			message.from_user.username,
+			category,
+			message.text.strip("%"))
+		await message.answer(
+			MSGS["client_created_success"],
+			reply_markup=getClientMarkup())
+		await state.clear()
+	else:
+		await message.answer(MSGS["seller_add_item__cashback_error"])
 
 @main_router.message(StateFilter(None), F.text == BUTTONS["client"]["menu"]["show_items"])
 async def show_items_handler(message, state):
@@ -143,8 +155,25 @@ async def ItemsListState_check_handler(call, state):
 	items = data.get("items")
 	item_id = items[data.get("current_item")].id
 
-	create_request(client_id, item_id)
+	if not get_current_request(client_id, item_id):
+		create_request(client_id, item_id)
 
-	await call.answer()
-	await call.message.answer(
-		MSGS["client_request_created"])
+		await call.answer()
+		await call.message.answer(
+			MSGS["client_request_created"])
+	else:
+		await call.message.answer(
+			MSGS["client_request_error"])
+
+@main_router.callback_query(F.data.startswith("check_new"))
+async def check_new_handler(call, state):
+	item_id = call.data.strip("check_new__")
+
+	if not get_current_request(call.from_user.id, item_id):
+		create_request(call.from_user.id, item_id)
+		await call.answer()
+		await call.message.answer(
+			MSGS["client_request_created"])
+	else:
+		await call.message.answer(
+			MSGS["client_request_error"])

@@ -12,6 +12,7 @@ class Client(Base):
 	tg_id: Mapped[str] = mapped_column(String(30))
 	username: Mapped[str] = mapped_column(String(255))
 	category_id: Mapped[int] = mapped_column(Integer())
+	min_cashback: Mapped[int] = mapped_column(Integer())
 
 	def __repr__(self):
 		return self.username

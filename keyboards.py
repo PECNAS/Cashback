@@ -149,5 +149,16 @@ def getCloseRequestMarkup(req_id):
 
 	return builder.as_markup()
 
+def getSendItemMarkup(link, item_id):
+	builder = InlineKeyboardBuilder()
+	builder.button(
+		text=BUTTONS["client"]["items_list"]["buy"],
+		url=link)
+	builder.button(
+		text=BUTTONS["client"]["items_list"]["check"],
+		callback_data=f"check_new__{item_id}")
+
+	return builder.as_markup()
+
 if __name__ == "__main__":
 	getCategoriesMarkup()

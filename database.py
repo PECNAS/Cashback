@@ -56,7 +56,7 @@ def check_user(tg_id):
 				except NoResultFound:
 					return None
 
-def create_client(tg_id, username, category):
+def create_client(tg_id, username, category, min_cashback):
 	'''
 	добавляет запись покупателя в базе данных
 	'''
@@ -66,7 +66,8 @@ def create_client(tg_id, username, category):
 		client = Client(
 			tg_id=tg_id,
 			username=username,
-			category_id=category.id)
+			category_id=category.id,
+			min_cashback=min_cashback)
 
 		session.add(client)
 		session.commit()
@@ -144,6 +145,8 @@ def create_item(title, desc, price, image, cashback, cond, seller_id, cat_id, li
 			link=link)
 		session.add(item)
 		session.commit()
+
+		return item.id
 
 def get_seller_items(tg_id):
 	with Session(engine) as session:
@@ -252,6 +255,18 @@ def get_requests():
 			)
 		return session.scalars(sel).all()
 
+def get_current_request(client_id, item_id):
+	with Session(engine) as session:
+		sel = select(Request).where(
+				Request.client_id.in_([client_id])
+			).where(
+				Request.item_id.in_([item_id])
+			).where(
+				Request.status.in_(["checking"])
+			)
+		res = session.scalars(sel).all()
+		return bool(len(res))
+
 def close_request(req_id):
 	with Session(engine) as session:
 		sel = select(Request).where(
@@ -263,4 +278,5 @@ def close_request(req_id):
 		session.commit()
 
 if __name__ == "__main__":
-	get_startup_info()
+	res = get_current_request(752594294, 2)
+	print(res)

@@ -69,9 +69,13 @@ async def ItemPriceState_handler(message, state):
 
 @main_router.message(StateFilter(CreateItemGroup.ItemLinkState))
 async def ItemLinkState_handler(message, state):
-	await message.answer(MSGS["seller_add_item__4"])
-	await state.update_data(link=message.text)
-	await state.set_state(CreateItemGroup.ItemCashbackState)
+	link = message.text
+	if link.startswith("https://") and len(link) > 8 and not link.strip("https://").isdigit() and (link.find(".com") != -1 or link.find(".ru") != -1):
+		await message.answer(MSGS["seller_add_item__4"])
+		await state.update_data(link=message.text)
+		await state.set_state(CreateItemGroup.ItemCashbackState)
+	else:
+		await message.answer(MSGS["seller_add_item__link_error"])
 
 @main_router.message(StateFilter(CreateItemGroup.ItemCashbackState))
 async def ItemCashbackState_handler(message, state):
@@ -143,7 +147,7 @@ async def ItemConfirmState_success_handler(call, state):
 
 	seller_id = get_seller_id(call.from_user.id)
 
-	create_item(
+	item_id = create_item(
 		title=title,
 		desc=data.get("desc"),
 		price=price,
@@ -156,25 +160,30 @@ async def ItemConfirmState_success_handler(call, state):
 
 	users = get_users_with_cat(data.get("category"))
 	for user in users:
-		print(user)
-		try:
-			text = MSGS["item_card"].format(
-			title,
-			description,
-			price,
-			cashback,
-			category,
-			data.get("cond"))
+		if int(user.min_cashback) <= int(cashback):
+			try:
+				text = MSGS["item_card"].format(
+				title,
+				description,
+				price,
+				cashback,
+				category,
+				data.get("cond"))
 
-			await bot.send_message(
-				chat_id=user.tg_id,
-				text=MSGS["new_item"])
-			await bot.send_photo(
-				chat_id=user.tg_id,
-				caption=text,
-				photo=image)
-		except:
-			print("Blocked")
+				await bot.send_message(
+					chat_id=user.tg_id,
+					text=MSGS["new_item"])
+				await bot.send_photo(
+					chat_id=user.tg_id,
+					caption=text,
+					photo=image,
+					reply_markup=getSendItemMarkup(
+						link,
+						item_id)
+					)
+			except Exception as e:
+				print(repr(e))
+				print("Blocked")
 
 	await call.message.answer(
 			MSGS["seller_add_item__success"],
@@ -220,7 +229,7 @@ async def seller_items_handler(call, state):
 			item.price,
 			item.cashback,
 			item.category.title,
-			item.cond
+			item.cashback_condition
 		)
 
 	await bot.send_photo(chat_id=call.from_user.id,
@@ -240,7 +249,7 @@ async def remove_item_handler(call, state):
 			title))
 	await call.message.delete()
 
-	await asyncio.sleep(2)
+	await asyncio.sleep(1)
 	await get_seller_items_handler(call.message, state, user_id=call.from_user.id)
 
 @main_router.callback_query(StateFilter(None), F.data == "back")
