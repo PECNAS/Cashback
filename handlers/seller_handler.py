@@ -291,7 +291,7 @@ async def EditParameterState_handler(message, state):
 
 	if parameter == "title":
 		item.title = message.text
-		
+
 	elif parameter == "desc":
 		item.description = message.text
 
@@ -316,6 +316,12 @@ async def EditParameterState_handler(message, state):
 		else:
 			await message.answer(MSGS["seller_add_item__link_error"])
 			return
+	elif parameter == "image":
+		if message.photo:
+			item.image = message.photo[0].file_id
+		else:
+			await message.answer(MSGS["seller_add_item__image_error"])
+			return
 
 	edit_item(item)
 
@@ -323,3 +329,4 @@ async def EditParameterState_handler(message, state):
 		MSGS["seller_edit_item__success"],
 		reply_markup=getSellerMarkup())
 	await state.clear()
+
