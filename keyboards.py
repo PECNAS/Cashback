@@ -67,12 +67,13 @@ def getSellerItemsMarkup(items):
 
 def getDeleteItemMarkup(item):
 	builder = InlineKeyboardBuilder()
+	for data, btn in BUTTONS["seller"]["items_list"].items():
+		builder.button(
+			text=btn,
+			callback_data=f"{data}{item.id}|{item.title}")
 	builder.button(
-		text="Удалить 🗑",
-		callback_data=f"remove_item__{item.id}|{item.title}")
-	builder.button(
-		text="Редактировать ✏",
-		callback_data=f"edit_item__{item.id}|{item.title}")
+		text="Ссылка",
+		url=item.link)
 	builder.button(
 		text="Назад ⏪",
 		callback_data=f"back")
@@ -158,6 +159,16 @@ def getSendItemMarkup(link, item_id):
 		text=BUTTONS["client"]["items_list"]["check"],
 		callback_data=f"check_new__{item_id}")
 
+	return builder.as_markup()
+
+def getItemEditMarkup():
+	builder = InlineKeyboardBuilder()
+	for data, btn in BUTTONS["seller"]["edit_item"].items():
+		builder.button(
+			text=btn,
+			callback_data=data)
+
+	builder.adjust(2)
 	return builder.as_markup()
 
 if __name__ == "__main__":

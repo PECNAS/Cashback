@@ -7,6 +7,8 @@ class ClientGroup(StatesGroup):
 class SellerGroup(StatesGroup):
 	ShopTitleState = State()
 	ShopUrlState = State()
+	EditItemState = State()
+	EditParameterState = State()
 
 class CreateItemGroup(StatesGroup):
 	ItemTitleState = State()

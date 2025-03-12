@@ -258,3 +258,68 @@ async def remove_item_handler(call, state):
 	await get_seller_items_handler(call.message, state, user_id=call.from_user.id)
 
 	await call.message.delete()
+
+@main_router.callback_query(StateFilter(None), F.data.startswith("edit_item__"))
+async def edit_item_handler(call, state):
+	await call.answer()
+
+	item = get_item_by_id(call.data.replace("edit_item__", "").split("|")[0])
+	print(item)
+	await state.update_data(item=item)
+
+	await call.message.answer(
+		MSGS["seller_edit_item"],
+		reply_markup=getItemEditMarkup())
+
+	await state.set_state(SellerGroup.EditItemState)
+
+@main_router.callback_query(StateFilter(SellerGroup.EditItemState))
+async def EditItemState_handler(call, state):
+	await call.answer()
+	await call.message.answer(
+		MSGS[f"seller_edit_item__{call.data.replace("edit_", "")}"]
+		)
+	await state.update_data(parameter=call.data.replace("edit_", ""))
+	await state.set_state(SellerGroup.EditParameterState)
+
+
+@main_router.message(StateFilter(SellerGroup.EditParameterState))
+async def EditParameterState_handler(message, state):
+	data = (await state.get_data())
+	parameter = data.get("parameter")
+	item = data.get("item")
+
+	if parameter == "title":
+		item.title = message.text
+		
+	elif parameter == "desc":
+		item.description = message.text
+
+	elif parameter == "price":
+		item.price = message.text
+
+	elif parameter == "cashback":
+		if message.text.endswith("%") and message.text.strip("%").isdigit():
+
+			item.cashback = message.text.strip("%")
+		else:
+			await message.answer(MSGS["seller_add_item__cashback_error"])
+			return
+
+	elif parameter == "condition":
+		item.cashback_condition = message.text
+
+	elif parameter == "link":
+		link = message.text
+		if link.startswith("https://") and len(link) > 8 and not link.strip("https://").isdigit() and (link.find(".com") != -1 or link.find(".ru") != -1):
+			item.link = link
+		else:
+			await message.answer(MSGS["seller_add_item__link_error"])
+			return
+
+	edit_item(item)
+
+	await message.answer(
+		MSGS["seller_edit_item__success"],
+		reply_markup=getSellerMarkup())
+	await state.clear()

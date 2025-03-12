@@ -277,6 +277,24 @@ def close_request(req_id):
 
 		session.commit()
 
+def edit_item(edited_item):
+	with Session(engine) as session:
+		sel = select(Item).where(
+				Item.id.in_([edited_item.id])
+			)
+		item = session.scalars(sel).one()
+
+		item.title = edited_item.title
+		item.description = edited_item.description
+		item.price = edited_item.price
+		item.cashback = edited_item.cashback
+		item.cashback_condition = edited_item.cashback_condition
+		item.link = edited_item.link
+		item.image = edited_item.image
+
+		session.commit()
+
+
 if __name__ == "__main__":
 	res = get_current_request(752594294, 2)
 	print(res)
