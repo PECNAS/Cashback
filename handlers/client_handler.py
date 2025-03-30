@@ -42,23 +42,41 @@ async def show_items_handler(message, state):
 	await state.set_state(ShowItemsGroup.CategoryState)
 
 @main_router.callback_query(StateFilter(ShowItemsGroup.CategoryState))
-async def CategoryState_handler(call, state):
-	await call.answer()
-	
-	cat_id = call.data.strip("category_")
-	items = get_items_in_category(cat_id)
+async def CategoryState_catalog_handler(call, state, query=None, message=None):
+	if not query:
+		await call.answer()
+		
+		cat_id = call.data.strip("category_")
+		items = get_items_in_category(cat_id)
+		await state.update_data(current_category=cat_id)
 
-	if not items:
-		await call.message.answer(MSGS["client_no_items"])
-		return
+		if not items:
+			await call.message.answer(
+				MSGS["client_no_items"],
+				reply_markup=getClientMarkup())
+			await state.set_state(None)
+			return
+
+		chat_id = call.from_user.id
+		await call.message.delete()
+
+	if query:
+		items = get_items_by_query(query)
+		if not items:
+			await message.answer(
+				MSGS["client_no_items"],
+				reply_markup=getClientMarkup())
+			await state.set_state(None)
+			return
+
+		chat_id = message.from_user.id
 
 	await state.set_state(ShowItemsGroup.ItemsListState)
+
 	await state.update_data(items=items)
 	await state.update_data(current_item=0)
-	await state.update_data(current_category=cat_id)
 
 	item = items[0]
-
 	text = MSGS["item_card"].format(
 			item.title,
 			item.description,
@@ -68,13 +86,10 @@ async def CategoryState_handler(call, state):
 			item.cashback_condition)
 
 	await bot.send_photo(
-		chat_id=call.from_user.id,
+		chat_id=chat_id,
 		caption=text,
 		photo=item.image,
 		reply_markup=getClientMenuMarkup(link=item.link))
-
-	await call.message.delete()
-
 
 @main_router.callback_query(StateFilter(ShowItemsGroup.ItemsListState), F.data == "back")
 async def ItemsListState_back_handler(call, state):
@@ -177,3 +192,12 @@ async def check_new_handler(call, state):
 	else:
 		await call.message.answer(
 			MSGS["client_request_error"])
+
+@main_router.message(StateFilter(None), F.text == BUTTONS["client"]["menu"]["find_items"])
+async def find_items_handler(message, state):
+	await message.answer(MSGS["client_find_items__start"])
+	await state.set_state(ClientGroup.FindItemsState)
+
+@main_router.message(StateFilter(ClientGroup.FindItemsState))
+async def FindItemsState_handler(message, state):
+	await CategoryState_catalog_handler(None, state, message.text, message)

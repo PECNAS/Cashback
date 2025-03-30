@@ -202,6 +202,15 @@ def get_items_in_category(cat_id):
 
 		return items
 
+def get_items_by_query(query):
+	with Session(engine) as session:
+		sel = select(Item).where(
+				Item.title.contains(query)
+			)
+		items = session.scalars(sel).all()
+
+		return items
+
 def get_users_with_cat(cat_id):
 	with Session(engine) as session:
 		sel = select(Client).where(
@@ -215,19 +224,25 @@ def get_startup_info():
 	with Session(engine) as session:
 		sel1 = select(Client)
 		sel2 = select(Seller)
-		sel3 = select(Item)
-		sel4 = select(Category)
+		sel3 = select(Moderator)
+		sel4 = select(Item)
+		sel5 = select(Category)
+		sel6 = select(Request)
 
 		clients = session.scalars(sel1).all()
 		sellers = session.scalars(sel2).all()
-		items = session.scalars(sel3).all()
-		cats = session.scalars(sel4).all()
+		moders = session.scalars(sel3).all()
+		items = session.scalars(sel4).all()
+		cats = session.scalars(sel5).all()
+		reqs = session.scalars(sel6).all()
 
 		return [
 			len(clients),
 			len(sellers),
+			len(moders),
 			len(cats),
-			len(items)
+			len(items),
+			len(reqs)
 		]
 
 def create_moderator(moder):

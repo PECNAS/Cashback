@@ -29,12 +29,14 @@ def startup():
 		create_category("Аксессуары")
 		create_category("Цветы")
 
-	clients, sellers, cats, items = get_startup_info()
+	clients, sellers, moders, cats, items, reqs = get_startup_info()
 	print(f"\n\nBot is started!\n\
 Number of clients: {clients}\n\
 Number of sellers: {sellers}\n\
+Number of moderators: {moders}\n\
 Number of categories: {cats}\n\
-Number of items: {items}\n\n")
+Number of items: {items}\n\
+Number of requests: {reqs}\n\n")
 
 def shutdown():
 	print("Goodbye, friend!")
